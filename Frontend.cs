@@ -16,17 +16,25 @@ namespace ProgressAPI.Frontend
 {
     public static class Frontend
     {
-        [FunctionName("GetProgress")]
-        public static async Task<IActionResult> GetProgress(
+        [FunctionName("GetAllProgress")]
+        public static async Task<IActionResult> GetAllProgress(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "progress")] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
+            return new OkObjectResult("Looking up all media progress");
+        }
 
-            var mediaId = req.Query["id"];
+        [FunctionName("GetIndividualProgress")]
+        public static async Task<IActionResult> GetIndividualProgress(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "progress/{mediaId}")] HttpRequest req,
+            string mediaId,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
 
             if (string.IsNullOrWhiteSpace(mediaId)) {
-                return new OkObjectResult("Looking up all media progress");
+                return new BadRequestResult();
             } else {
                 return new OkObjectResult("Looking up individual media progress");
             }
@@ -36,15 +44,13 @@ namespace ProgressAPI.Frontend
         public static void UpdateProgress(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "progress")] ProgressUpdateRequest updateRequest,
             [CosmosDB(
-                databaseName: "ToDoItems",
-                collectionName: "Items",
+                databaseName: "ProgressAPI",
+                collectionName: "Progress",
                 ConnectionStringSetting = "CosmosDB",
                 CreateIfNotExists = true)]
                 out ProgressUpdateRequest outDocument,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
             outDocument = updateRequest;
         }
 
