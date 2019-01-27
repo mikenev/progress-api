@@ -8,5 +8,9 @@ namespace ProgressAPI.Models
         public string MediaId { get; set; }
 
         public long ProgressSeconds { get; set; }
+
+        public ProgressUpdateRequest() {
+            
+        }
     }
 }

@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Azure.WebJobs.Extensions.CosmosDB;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -30,25 +33,19 @@ namespace ProgressAPI.Frontend
         }
 
         [FunctionName("UpdateProgress")]
-        public static async Task<IActionResult> UpdateProgress(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "progress")] HttpRequest req,
+        public static void UpdateProgress(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "progress")] ProgressUpdateRequest updateRequest,
+            [CosmosDB(
+                databaseName: "ToDoItems",
+                collectionName: "Items",
+                ConnectionStringSetting = "CosmosDB",
+                CreateIfNotExists = true)]
+                out ProgressUpdateRequest outDocument,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            try
-            {
-                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var data = JsonConvert.DeserializeObject<ProgressUpdateRequest>(requestBody);
-
-
-
-                return new OkResult();
-            }
-            catch (Exception ex)
-            {
-                return new BadRequestObjectResult(ex.Message);
-            }
+            outDocument = updateRequest;
         }
 
     }
